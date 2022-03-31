@@ -106,15 +106,21 @@ The **/app/secrets.json5** file is used to hold secrets for the app and is exclu
 * When deploying to a remote host, either of the following should work:
   * Copy the whole repo (with the **secrets.json5** and **ca_certificate.pem** if required) and then build the production docker compose in-place.
     * On the target server
+      * On servers, Docker Compose needs to be installed. Ensure it's installed. If not, see [Docker Compose Install](https://docs.docker.com/compose/install/).
       * Change into the **rabbitmq-to-eventhub-prod** folder
       * Ensure you have the proper values in **.env**
-      * `docker compose build`
-      * `docker compose up` to run the container interactively. It is recommended that you run the first time with "ackAfterConsume=false" so you don't lose any messages if there's a container error.
+      * Ensure you've edited **/conf/secrets.json5** to suit your needs.
+      * * If you need a **ca_certificate.pem**, make sure it's in **/conf**.
+      * `docker-compose build`
+      * `docker-compose up` to run the container interactively. It is recommended that you run the first time with "ackAfterConsume=false" so you don't lose any messages if there's a container error.
       * Once satisfied the container is working properly, stop the interactive mode, change "ackAfterConsume=true" and run with `docker compose up -d` to run in the background
+      * Note that if you change values in **/conf/secrets.json5**, or update your **ca_certificate.pem**, you must repeat the Docker build step. Changing values in **.env** does not require a rebuild.
   * The production docker compose build can be done in a remote machine and then the docker container can be exported using Docker's export command.
     * On your build workstation
       * Change into the **rabbitmq-to-eventhub-prod** folder
       * Ensure you have the proper values in **.env**
+      * Ensure you've edited **/conf/secrets.json5** to suit your needs.
+      * If you need a **ca_certificate.pem**, make sure it's in **/conf**.
       * `docker compose build`
       * `docker export rabbitmq-to-eventhub-prod > rabbitmq-to-eventhub-prod.tar`
     * On the host
@@ -122,6 +128,7 @@ The **/app/secrets.json5** file is used to hold secrets for the app and is exclu
       * `docker import rabbitmq-to-eventhub-prod.tar`
       * `docker compose up` to run the container interactively. It is recommended that you run the first time with "ackAfterConsume=false" so you don't lose any messages if there's a container error.
       * Once satisfied the container is working properly, stop the interactive mode, change "ackAfterConsume=true" and run with `docker compose up -d` to run in the background
+      * Note that if you change values in **/conf/secrets.json5**, or update your **ca_certificate.pem**, you must repeat the Docker build step (and export/upload/import to your host).
       
 Environment variable notes for running in-place at an RMQ server (it's assumed said server is using AMQPS / AMQP over TLS):
 
