@@ -65,7 +65,7 @@ eventHubName="mkalx-inputeventhub-test"
 
 The **/app/secrets.json5** file is used to hold secrets for the app and is excluded from the repo via .gitignore.
 
-```text
+```json5
 {
   "amqpUsername": "ENTER USERNAME HERE",
   "amqpPassword": "ENTER PASSWORD HERE",
@@ -126,7 +126,7 @@ The **/app/secrets.json5** file is used to hold secrets for the app and is exclu
 Environment variable notes for running in-place at an RMQ server (it's assumed said server is using AMQPS / AMQP over TLS):
 
   * The prod container rabbitmq-to-eventhub-prod is suitable to run on the RMQ server itself. Therefore, the RMQ host in this case will be the docker host (using the special "host-gateway" alias).
-  * To avoid TLS issues, we used docker's extra_hosts to create a docker compose level HOSTS entry to map the TLS hostname to "host-gateway". See the section [To run the Docker container on your RMQ host](#To-run-the-Docker-container-on-your-RMQ-host)
+  * To avoid TLS issues, we used docker's extra_hosts to create a docker compose level HOSTS entry to map the TLS hostname to "host-gateway". See the section [To run the Docker container on your RMQ host](#to-run-the-docker-container-prod-on-your-rmq-host).
 
 ## Azure EventHub Capture
 
