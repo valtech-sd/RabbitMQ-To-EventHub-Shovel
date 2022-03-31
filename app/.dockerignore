@@ -1,0 +1,10 @@
+# Exclude Docker's own files we don't need on the host
+.dockerignore
+Dockerfile
+
+# Exclude some files not needed in the build
+.env
+.nvmrc
+environment.template
+node_modules/**
+conf/.gitignore

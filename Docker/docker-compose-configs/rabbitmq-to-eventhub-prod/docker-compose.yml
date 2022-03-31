@@ -1,0 +1,29 @@
+version: '3.7'
+
+services:
+
+  # External HTTP API that accepts messages from devices
+  rmq-to-eventhub:
+    build:
+      context: ../../../app
+    user: 'node'
+    restart: always
+    working_dir: /home/node/app
+#    extra_hosts:
+#      # If this container will be run on the RMQ host directly, we need to map the RMQ hostname with the internal special host gateway
+#      # in order send the traffic to the docker host! This is like setting the HOSTS file inside the container.
+#      # Uncomment this if you plan to run this Docker container on the RMQ host directly.
+#      # Otherwise, leave this entire section commented!
+#      - "${amqpHost}:host-gateway"
+    environment:
+      # If only the name is provided, keep the value in the .env file
+      # Otherwise, override any entries by providing =value.
+      - NODE_ENV
+      - logLevel=info # Override the LOG_LEVEL value set in .env with ALL
+      - amqpHost
+      - amqpVhost
+      - amqpPort
+      - amqpProtocol
+      - amqpConsumeQueue
+      - ackAfterConsume
+      - eventHubName

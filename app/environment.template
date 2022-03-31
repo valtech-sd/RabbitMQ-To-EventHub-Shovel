@@ -1,0 +1,38 @@
+# You'll need a .env file in the app directory if:
+# - You're running node / nvm natively on your target host
+# - You're using the Docker Compose rabbitmq-to-eventhub-dev.yml
+
+# Make a copy of this file and save it to .env in the app directory of the project.
+# Edit the values as needed!
+# Use the secrets.json file to store passwords and other secrets!
+
+# Node Environment Config
+NODE_ENV=dev
+
+# Set a log level that suits your needs.
+# Supported Log Levels:
+# OFF	 - nothing is logged
+# FATAL - fatal errors are logged
+# ERROR - errors are logged
+# WARN	 - warnings are logged
+# INFO	 - infos are logged
+# DEBUG - debug infos are logged
+# TRACE - traces are logged
+# ALL   - everything is logged
+logLevel=info
+
+# RMQ (AMQP) Properties
+amqpHost=""
+# vhost can be left blank or no vhost.
+amqpVhost=""
+# leave port blank to let the library automatically choose
+amqpPort=
+# Which Protocol to use to connect to AMQP (amqp, amqps)
+amqpProtocol="amqps"
+# Name of the queue to consume from
+amqpConsumeQueue=""
+# Should messages be ACK after consume? This will tell RMQ to remove them from the Queue once processed.
+ackAfterConsume=false
+
+# EventHub Properties
+eventHubName=""

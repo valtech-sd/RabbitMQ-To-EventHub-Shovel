@@ -1,0 +1,19 @@
+{
+  "name": "valtech-rabbitmq-to-eventhub",
+  "version": "1.0.0",
+  "description": "A template repo that contains a NodeJS app that will consume messages from a RabbitMQ queue and immediately send them to an Azure EventHub.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [],
+  "author": "Eric.Soto@valtech.com",
+  "license": "MIT",
+  "dependencies": {
+    "amqp-cacoon": "^3.1.0",
+    "log4js": "^6.4.4",
+    "@azure/event-hubs": "^5.7.0",
+    "dotenv": "^16.0.0",
+    "json5": "^2.2.1"
+  }
+}
