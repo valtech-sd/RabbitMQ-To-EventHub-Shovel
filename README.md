@@ -12,23 +12,73 @@ This repo (RabbitMQ to EventHub Shovel) is a template that contains a NodeJS app
 
 **Secrets, CA_Certificate**
 
-* You need a **secrets.json5** file in **/app/conf**.
-* See the template **secrets-template.json5** for the structure.
-
-* If your RMQ host uses AMQP, you'll need the CA Certfile for the server in **ca_certfile.pem**.
-* Be sure to set the environment variable **amqpProtocol="amqps"**.
-* Also, in **secrets.json5**, make sure **amqpCACertName=""** contains the name of your cert file (default name is **ca_certfile.pem**).
+See [Secrets Explained](#Secrets-Explained).
 
 **Environment**
+
+See [Environment Variables Explained](#Environment-Variables-Explained).
+
+**RabbitMQ & Azure**
+
+* Last, you need an RMQ server and an Azure Event Hub. Messages from a queue in the RMQ server will be sent to the Azure Event Hub. Note the routing key sent to RMQ will be passed into Azure Event Hub via the properties bag. (EventHub sends your program an EventData object that has the properties "body" and "properties". The routing key will be passed into **EventData.properties.routingKey**).
+
+## Environment Variables Explained
+
+The **.env** file is used to control all the parameters for the app. 
 
 * You need environment variables set. See the file corresponding to your run method.
   * If you're running natively, see the template **/app/environment.template** and use it to create a .env file in **/app**.
   * If you're running **rabbitmq-to-eventhub-dev**, see the template **/rabbitmq-to-eventhub-dev/environment.template** and use it to create a **.env** file in **/rabbitmq-to-eventhub-dev**.
   * If you're running **rabbitmq-to-eventhub-prod**, see the template **/rabbitmq-to-eventhub-prod/environment.template** and use it to create a **.env** file in **/rabbitmq-to-eventhub-prod**.
 
-**RabbitMQ & Azure**
+```text
+# Set a log level that suits your needs.
+# Supported Log Levels:
+# OFF	 - nothing is logged
+# FATAL - fatal errors are logged
+# ERROR - errors are logged
+# WARN	 - warnings are logged
+# INFO	 - infos are logged
+# DEBUG - debug infos are logged
+# TRACE - traces are logged
+# ALL   - everything is logged
+logLevel=all
 
-* Last, you need an RMQ server and an Azure Event Hub. Messages from a queue in the RMQ server will be sent to the Azure Event Hub. Note the routing key sent to RMQ will be passed into Azure Event Hub via the properties bag. (EventHub sends your program an EventData object that has the properties "body" and "properties". The routing key will be passed into **EventData.properties.routingKey**).
+# RMQ (AMQP) Properties
+amqpHost="some.host.com"
+# vhost can be left blank or no vhost.
+amqpVhost=""
+# leave port blank to let the library automatically choose
+amqpPort=
+# Which Protocol to use to connect to AMQP (amqp, amqps)
+amqpProtocol="amqps"
+# Name of the queue to consume from (must exist on the RMQ host)
+amqpConsumeQueue=""
+# Should messages be ACK after consume? This will tell RMQ to remove them from the Queue once processed. (true, false)
+ackAfterConsume=false
+
+# EventHub Properties
+eventHubName="mkalx-inputeventhub-test"
+```
+
+## Secrets Explained
+
+The **/app/secrets.json5** file is used to hold secrets for the app and is excluded from the repo via .gitignore.
+
+```text
+{
+  "amqpUsername": "ENTER USERNAME HERE",
+  "amqpPassword": "ENTER PASSWORD HERE",
+  "amqpCACertName": "ENTER THE NAME OF YOUR CA CERT FILE AND COPY IT TO THE SAME DIR AS secrets.json5",
+
+  // Event Hub Connection String
+  "eventHubConnectionString": "Enter the Event Hub Connection String Here"
+}
+```
+
+* If your RMQ host uses AMQPS (AMQP over TLS), you'll need the CA Certfile for the server in **/app/conf/ca_certfile.pem**.
+* Be sure to set the environment variable **amqpProtocol="amqps"**.
+* Also, in **secrets.json5**, make sure **amqpCACertName=""** contains the name of your cert file (recommended name is **ca_certfile.pem**).
 
 ## How to run the app
 
@@ -76,7 +126,7 @@ This repo (RabbitMQ to EventHub Shovel) is a template that contains a NodeJS app
 Environment variable notes for running in-place at an RMQ server (it's assumed said server is using AMQPS / AMQP over TLS):
 
   * The prod container rabbitmq-to-eventhub-prod is suitable to run on the RMQ server itself. Therefore, the RMQ host in this case will be the docker host (using the special "host-gateway" alias).
-  * To avoid TLS issues, we used docker's extra_hosts to create a docker compose level HOSTS entry to map the TLS hostname to "host-gateway". See the section ["To run the Docker container on your RMQ host"](#To run the Docker container on your RMQ host)
+  * To avoid TLS issues, we used docker's extra_hosts to create a docker compose level HOSTS entry to map the TLS hostname to "host-gateway". See the section [To run the Docker container on your RMQ host](#To-run-the-Docker-container-on-your-RMQ-host)
 
 ## Azure EventHub Capture
 
