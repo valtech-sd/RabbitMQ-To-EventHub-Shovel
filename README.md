@@ -59,7 +59,42 @@ ackAfterConsume=false
 
 # EventHub Properties
 eventHubName="mkalx-inputeventhub-test"
+
+# Advanced Shovel Parameters
+
+# ************
+# Batch Mode *
+# ************
+# If working in batch mode, uncomment these parameters and comment the oneEach parameters
+consumeMode=batch
+# AMQP Prefetch Count (the maximum number of messages sent over the channel that can be awaiting acknowledgement).
+# Default is unlimited. Either comment this out for unlimited OR set a sufficiently large number to meet your needs.
+#amqpPrefetch=300
+# How many bytes in flight before a batch is released for consumption
+batchMaxSizeBytes=100000
+# How many seconds in light before a batch is release for consumption
+batchMaxTimeMs=5000
+
+# **************
+# OneEach Mode *
+# **************
+# If working in oneEach mode, uncomment these parameters and comment the batch parameters
+#consumeMode=oneEach
+# AMQP Prefetch Count (the maximum number of messages sent over the channel that can be awaiting acknowledgement).
+# If using consumeLimit, set this to a number less than or equal your limit.
+#amqpPrefetch=10
+# How many messages to consume (0=all, otherwise enter a limit)
+# Should be a multiple of amqpPrefetch (which should not be set to unlimited for limiting to work).
+#consumeLimit=10
 ```
+
+Note there are two modes for **consumeMode**:
+- oneEach - consumes one message at a time and is suitable for testing or very low volume queues. Messages will be sent to Eventhub one at a time, not in batches.
+- batch - consumes messages in batches controlled by batch size. Suitable for high volume queues. Messages will be sent to Eventhub in batches.
+
+**What is Prefetch?**
+
+Prefetch is the number of messages "in flight" that a connection into RMQ is allowed. "In flight" means messages that have been sent to a consumer but are not yet ACK by said consumer. The default is unlimited and should be used unless you specifically want to slow down message consumption. Setting a value of 1 would beam that each message must be sent to Eventhub (and then ACK) before RMQ will release a new one. 
 
 ## Secrets Explained
 
