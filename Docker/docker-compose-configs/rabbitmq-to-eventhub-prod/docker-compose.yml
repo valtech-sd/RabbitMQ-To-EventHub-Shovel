@@ -27,3 +27,8 @@ services:
       - amqpConsumeQueue
       - ackAfterConsume
       - eventHubName
+      - consumeMode
+      - amqpPrefetch
+      - batchMaxSizeBytes
+      - batchMaxTimeMs
+      - consumeLimit

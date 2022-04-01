@@ -13,9 +13,14 @@ const { EventHubProducerClient } = require('@azure/event-hubs');
 require('dotenv').config();
 
 // Bring in other Application Specific dependencies
-const logger = require('./custom-logger');
+const logger = require('./modules/custom-logger');
 // Bring in our AMQP Broker configuration
 const config = require('./conf/config');
+// Bring in our MessageProcessor
+const MessageProcessor = require('./modules/MessageProcessor');
+
+// Constants
+const amqpPrefetch = parseInt(process.env.amqpPrefetch) || false;
 
 /**
  * AMQP Cacoon is a library that makes it easy to connect to RabbitMQ.
@@ -50,6 +55,15 @@ let amqpCacoon = new AmqpCacoon({
   // This might not be needed in environments where RMQ is setup by some other process!
   onChannelConnect: async (channel) => {
     try {
+      // Set prefetch to something per .env or a default
+      // This controls how many messages RMQ will release before requiring ACK
+      if (amqpPrefetch) {
+        logger.info(
+          `AMQP Prefetch set to: ${amqpPrefetch} messages released before ACK.`
+        );
+        channel.prefetch(amqpPrefetch);
+      }
+
       logger.info(`AMQP Channel Connect.`);
       // Assert exchanges, queues, etc. here if necessary!
     } catch (ex) {
@@ -70,75 +84,22 @@ const eventHubProducer = new EventHubProducerClient(
 );
 
 /**
- * Logic Main Method
- * Let's create a main method to hold our logic...
- */
-async function main() {
-  // Output info
-  logger.info(`EventHub Output: ${config.eventHubConfig.eventHubName}`);
-
-  // Connects and sets up a subscription channelWrapper
-  await amqpCacoon.getConsumerChannel();
-
-  // Register a consumer to consume batches of messages
-  await amqpCacoon.registerConsumerBatch(
-    config.amqpConfig.consumeQueue,
-    async (channelWrapper, msgBatch) => {
-      try {
-        logger.info(
-          `Received message batch with count ${msgBatch.messages.length}`
-        );
-        // Prepare an EventHub Batch
-        let eventHubBatch = await eventHubProducer.createBatch();
-        // Loop through the batch and handle each message as needed
-        for (let msg of msgBatch.messages) {
-          // The msg from RMQ has the properties:
-          // - content - which has the message in a buffer. Use toString() to extract as a string.
-          // - fields - which has standard RMQ properties and metadata. In our care, we're interested in routingKey.
-          logger.debug(
-            `Message from exchange='${msg.fields.exchange}' and routingKey='${msg.fields.routingKey}'.`
-          );
-          logger.trace(`Message: ${msg.content.toString()}`);
-          // Add the record to the Event Hub Batch
-          eventHubBatch.tryAdd({
-            body: msg.content.toString(),
-            properties: { routingKey: msg.fields.routingKey },
-          });
-        }
-        // Send the EventHub Batch
-        logger.info(
-          `Sending batch to EventHub with ${eventHubBatch.count} records and ${eventHubBatch.sizeInBytes} bytes.`
-        );
-        await eventHubProducer.sendBatch(eventHubBatch);
-        // Once processing is done, ACK them all if the config is set for that!
-        if (config.amqpConfig.ackAfterConsume) {
-          msgBatch.ackAll();
-        } else {
-          msgBatch.nackAll();
-        }
-      } catch (e) {
-        // Some error happened in our handling of the message batch.
-        // The bet practice is to NACK all the messages so that some other process retries them!
-        msgBatch.nackAll();
-      }
-    },
-    {
-      batching: {
-        maxSizeBytes: 1000, // A total of 1,000 Bytes will force consume
-        maxTimeMs: 5000, // 5000ms = 5s elapsed will for a consume
-      },
-    }
-  );
-}
-
-/**
  * Let's do this!
  */
 logger.info(
   `Registering a consumer for your AMQP host "${config.amqpConfig.host}"`
 );
 
-main()
+// Point to the proper handler based on consumeMode
+const consumeMode = process.env.consumeMode || 'batch';
+const mp = new MessageProcessor(config, amqpCacoon, eventHubProducer, logger);
+const handler =
+  consumeMode === 'batch'
+    ? mp.consumeBatch.bind(mp)
+    : mp.consumeOneeach.bind(mp);
+
+// Fire off the handler and process messages
+handler()
   .then(() => {
     // Ok, we should have a consumer ready! And it should be firing as messages arrive at the consumed queue!
   })

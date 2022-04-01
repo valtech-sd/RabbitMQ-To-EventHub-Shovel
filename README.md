@@ -184,5 +184,5 @@ ssh -N -i "/path/to/your/key.pem" -L 127.0.0.1:15671:127.0.0.1:5671 -o ServerAli
 
 ## TODO:
 
-- Nothing identified at the moment.
+- Nothing yet noted.
 

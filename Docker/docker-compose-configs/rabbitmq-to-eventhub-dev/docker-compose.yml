@@ -27,6 +27,11 @@ services:
       - amqpConsumeQueue
       - ackAfterConsume
       - eventHubName
+      - consumeMode
+      - amqpPrefetch
+      - batchMaxSizeBytes
+      - batchMaxTimeMs
+      - consumeLimit
     command: 'npm run start'
     volumes:
       - type: bind
