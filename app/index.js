@@ -59,7 +59,7 @@ let amqpCacoon = new AmqpCacoon({
       // This controls how many messages RMQ will release before requiring ACK
       if (amqpPrefetch) {
         logger.info(
-          `AMQP Prefetch set to: ${amqpPrefetch} messages released before ACK.`
+          `AMQP Prefetch set to: ${amqpPrefetch} messages released before ACK/NACK.`
         );
         channel.prefetch(amqpPrefetch);
       }

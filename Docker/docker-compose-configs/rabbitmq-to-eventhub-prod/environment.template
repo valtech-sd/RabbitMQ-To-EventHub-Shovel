@@ -31,6 +31,7 @@ amqpProtocol="amqps"
 # Name of the queue to consume from
 amqpConsumeQueue=""
 # Should messages be ACK after consume? This will tell RMQ to remove them from the Queue once processed.
+# Note that setting ackAfterConsume to false might lead to consuming the same messages repeatedly!
 ackAfterConsume=false
 # How many messages to consume (0=all, otherwise enter a limit)
 # Note, using a limit here with ackAfterConsume=true will lead to data loss as some messages in the

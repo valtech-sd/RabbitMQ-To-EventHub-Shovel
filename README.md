@@ -55,6 +55,7 @@ amqpProtocol="amqps"
 # Name of the queue to consume from (must exist on the RMQ host)
 amqpConsumeQueue=""
 # Should messages be ACK after consume? This will tell RMQ to remove them from the Queue once processed. (true, false)
+# Note that setting ackAfterConsume to false might lead to consuming the same messages repeatedly!
 ackAfterConsume=false
 
 # EventHub Properties
