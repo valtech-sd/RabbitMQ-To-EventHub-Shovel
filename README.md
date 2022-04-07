@@ -220,5 +220,6 @@ ssh -N -i "/path/to/your/key.pem" -L 127.0.0.1:15671:127.0.0.1:5671 -o ServerAli
 
 ## TODO:
 
-- Nothing yet noted.
+- The package "@azure/event-hubs" doesn't provide any errors or feedback if it can't connect to the Eventhub for any reason. This is undesirable as the awaits all just hang and there does not appear to be a way to trap a connection issue.
+  - Need to research this further to see if there's a provided way to trap connection errors. If not, need to open an ISSUE on the repo for this package. See [@azure/event-hubs NPM page](https://www.npmjs.com/package/@azure/event-hubs).
 
