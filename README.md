@@ -222,4 +222,122 @@ ssh -N -i "/path/to/your/key.pem" -L 127.0.0.1:15671:127.0.0.1:5671 -o ServerAli
 
 - The package "@azure/event-hubs" doesn't provide any errors or feedback if it can't connect to the Eventhub for any reason. This is undesirable as the awaits all just hang and there does not appear to be a way to trap a connection issue.
   - Need to research this further to see if there's a provided way to trap connection errors. If not, need to open an ISSUE on the repo for this package. See [@azure/event-hubs NPM page](https://www.npmjs.com/package/@azure/event-hubs).
+  - Might be easier to use the API directly with something like AXIOS. See "send.js" below for an example that just uses the HTTP API.
+- Under a scenario where we set batch size from RMQ to 300, while testing, was not seeing the same 300 messages go to EventHub. Not sure if EventHub has a limit or there's a need to detect the batch is "full" before flushing perhaps in two steps. Requires reearch.
+  - Tracking under https://github.com/valtech-sd/RabbitMQ-To-EventHub-Shovel/issues/2
+
+## Appendixes
+
+### Send.JS - example sending to Azure EventHub using the HTTP API
+
+```javascript
+#!/usr/bin/env node
+
+// Package Dependencies
+const axios = require('axios');
+const utf8 = require('utf8');
+const crypto = require('crypto');
+const dotenv = require('dotenv')
+dotenv.config()
+
+// Ensure we loaded from .env
+if (!process.env ||
+  !process.env.EVENTHUB_URI ||
+  !process.env.EVENTHUB_NAME ||
+  !process.env.SHARED_ACCESS_KEY_NAME ||
+  !process.env.SHARED_ACCESS_KEY) {
+  console.error(`.env does not have the required values!`)
+  process.exit(-1)
+}
+
+// Constants, load from .env file in the project root
+EVENTHUB_URI=process.env.EVENTHUB_URI
+EVENTHUB_NAME=process.env.EVENTHUB_NAME
+SHARED_ACCESS_KEY_NAME=process.env.SHARED_ACCESS_KEY_NAME
+SHARED_ACCESS_KEY=process.env.SHARED_ACCESS_KEY
+SEND_COUNT=process.env.SEND_COUNT
+
+// Test Data To Send (random stuff, random count)
+// Note this sends 1 to 10 events of random data
+var dataArray=[];
+const howManyRecordsToGenerate = SEND_COUNT || Math.floor(Math.random() * 10) + 1;
+for (var i = howManyRecordsToGenerate; i > 0; i--) {
+  dataArray.push(generateTestDataObject())
+}
+const data = JSON.stringify(dataArray);
+
+// Request Config - POST to Azure Event Hub
+// Azure Horrible Doc Here: https://docs.microsoft.com/en-us/rest/api/eventhub/send-event
+// And here for BATCH: https://docs.microsoft.com/en-us/rest/api/eventhub/send-batch-events
+var config = {
+  method: 'post',
+  url: `${EVENTHUB_URI}${EVENTHUB_NAME}/messages?timeout=60&api-version=2014-01`,
+  headers: {
+    'Authorization': `${createSharedAccessToken(EVENTHUB_URI, SHARED_ACCESS_KEY_NAME, SHARED_ACCESS_KEY)}`,
+    'Content-Type': 'application/json'
+  },
+  data : data
+};
+
+// Output a banner
+const banner = `send.js is sending...
+- Namespace: ${EVENTHUB_URI}
+- Hub: ${EVENTHUB_NAME}
+- Data (Events = ${dataArray.length}): ${data}`
+console.log(banner);
+
+// Axios Send
+axios(config)
+  .then(function (response) {
+    console.log(`Result: ${response.status} - ${response.statusText}`);
+  })
+  .catch(function (error) {
+    console.log(`Error: ${error}`);
+  });
+
+// Helper Functions
+
+/**
+ * Generates a test data item with random data
+ * Note the object structure is per Azure Batch Spec,
+ * an object with at most 3 top level properties:
+ * - Body
+ * - BrokerProperties
+ * - UserProperties
+ *
+ * Each property in turn can contain further structure!
+ */
+function generateTestDataObject() {
+  return {
+    "Body": {
+      "deviceId": `dev-${Math.floor(Math.random() * 10)+1}`,
+      "timestamp": `${Math.floor(new Date().getTime()/1000.0)}`,
+      "temperature": `${Math.floor(Math.random() * 10100)/100}`
+    },
+    "BrokerProperties": {},
+    "UserProperties": {
+      "sentFrom": "send.js"
+    }
+  }
+}
+
+/**
+ * Creates a SAS Token per MS
+ * Comes from: https://docs.microsoft.com/en-us/rest/api/eventhub/generate-sas-token
+ */
+function createSharedAccessToken(uri, saName, saKey) {
+  if (!uri || !saName || !saKey) {
+    throw "Missing required parameter";
+  }
+  var encoded = encodeURIComponent(uri);
+  var now = new Date();
+  var week = 60*60*24*7;
+  var ttl = Math.round(now.getTime() / 1000) + week;
+  var signature = encoded + '\n' + ttl;
+  var signatureUTF8 = utf8.encode(signature);
+  var hash = crypto.createHmac('sha256', saKey).update(signatureUTF8).digest('base64');
+  return 'SharedAccessSignature sr=' + encoded + '&sig=' +
+    encodeURIComponent(hash) + '&se=' + ttl + '&skn=' + saName;
+}
+```
 

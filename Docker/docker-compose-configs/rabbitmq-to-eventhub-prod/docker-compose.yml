@@ -6,6 +6,10 @@ services:
   rmq-to-eventhub:
     build:
       context: ../../../app
+    # Scale the container to multiple instances as needed
+    deploy:
+      mode: replicated
+      replicas: 5
     user: 'node'
     restart: always
     working_dir: /home/node/app
