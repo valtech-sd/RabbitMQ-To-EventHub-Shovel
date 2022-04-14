@@ -9,7 +9,7 @@ services:
     # Scale the container to multiple instances as needed
     deploy:
       mode: replicated
-      replicas: 5
+      replicas: 20
     user: 'node'
     restart: always
     working_dir: /home/node/app
