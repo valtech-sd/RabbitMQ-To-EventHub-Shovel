@@ -223,7 +223,7 @@ ssh -N -i "/path/to/your/key.pem" -L 127.0.0.1:15671:127.0.0.1:5671 -o ServerAli
 - The package "@azure/event-hubs" doesn't provide any errors or feedback if it can't connect to the Eventhub for any reason. This is undesirable as the awaits all just hang and there does not appear to be a way to trap a connection issue.
   - Need to research this further to see if there's a provided way to trap connection errors. If not, need to open an ISSUE on the repo for this package. See [@azure/event-hubs NPM page](https://www.npmjs.com/package/@azure/event-hubs).
   - Might be easier to use the API directly with something like AXIOS. See "send.js" below for an example that just uses the HTTP API.
-- Under a scenario where we set batch size from RMQ to 300, while testing, was not seeing the same 300 messages go to EventHub. Not sure if EventHub has a limit or there's a need to detect the batch is "full" before flushing perhaps in two steps. Requires reearch.
+- Under a scenario where we set batch size from RMQ to 300, while testing, was not seeing the same 300 messages go to EventHub. Not sure if EventHub has a limit or there's a need to detect the batch is "full" before flushing perhaps in multiple steps. Requires research.
   - Tracking under https://github.com/valtech-sd/RabbitMQ-To-EventHub-Shovel/issues/2
 
 ## Appendixes
