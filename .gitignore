@@ -3,6 +3,12 @@ tmp/
 
 # Exclude .env files globally
 **/.env
+shovel.env
+
+# Exclude certs
+ca_certificate.mkalx.pem
+ca_certificate.pem
+secrets.json5
 
 # Excluding node_modules
 node_modules
@@ -50,3 +56,4 @@ atlassian-ide-plugin.xml
 # Editor-based Rest Client
 .idea/httpRequests
 
+/app/conf/deprecated/secrets.mkalx.json5

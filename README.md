@@ -10,26 +10,21 @@ This repo (RabbitMQ to EventHub Shovel) is a template that contains a NodeJS app
 
 * From the **/app** directory, run `npm i`.
 
-**Secrets, CA_Certificate**
-
-See [Secrets Explained](#Secrets-Explained).
-
-**Environment**
+**Environment,Secrets, CA_Certificate**
 
 See [Environment Variables Explained](#Environment-Variables-Explained).
 
 **RabbitMQ & Azure**
 
-* Last, you need an RMQ server and an Azure Event Hub. Messages from a queue in the RMQ server will be sent to the Azure Event Hub. Note the routing key sent to RMQ will be passed into Azure Event Hub via the properties bag. (EventHub sends your program an EventData object that has the properties "body" and "properties". The routing key will be passed into **EventData.properties.routingKey**).
+* Last, you need an RMQ server and an Azure Event Hub. Messages from a queue in the RMQ server will be sent to the Azure Event Hub. Note the routing key set in RMQ will be passed into Azure Event Hub via the properties bag. (EventHub sends your program an EventData object that has the properties "body" and "properties". The routing key will be passed into **EventData.properties.routingKey**).
 
 ## Environment Variables Explained
 
-The **.env** file is used to control all the parameters for the app. 
+The `app/conf/shovel.env `file is used to control all the parameters and secrets for the app. 
 
-* You need environment variables set. See the file corresponding to your run method.
-  * If you're running natively, see the template **/app/environment.template** and use it to create a .env file in **/app**.
-  * If you're running **rabbitmq-to-eventhub-dev**, see the template **/rabbitmq-to-eventhub-dev/environment.template** and use it to create a **.env** file in **/rabbitmq-to-eventhub-dev**.
-  * If you're running **rabbitmq-to-eventhub-prod**, see the template **/rabbitmq-to-eventhub-prod/environment.template** and use it to create a **.env** file in **/rabbitmq-to-eventhub-prod**.
+* You need environment variables set. Set the file corresponding to your run method according to the `How to run the app` section below.
+
+### Rabbit Parameters
 
 ```text
 # Set a log level that suits your needs.
@@ -57,9 +52,6 @@ amqpConsumeQueue=""
 # Should messages be ACK after consume? This will tell RMQ to remove them from the Queue once processed. (true, false)
 # Note that setting ackAfterConsume to false might lead to consuming the same messages repeatedly!
 ackAfterConsume=false
-
-# EventHub Properties
-eventHubName="mkalx-inputeventhub-test"
 
 # Advanced Shovel Parameters
 
@@ -89,6 +81,26 @@ batchMaxTimeMs=5000
 #consumeLimit=10
 ```
 
+# EventHub Properties
+
+```text
+  eventHubName="mkalx-inputeventhub-test"
+  eventHubConnectionString=Endpoint=sb://SOMEENDPOINT/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SOMEKEY
+```
+
+### Rabbit Secrets
+
+```text
+  "amqpUsername": "ENTER USERNAME HERE",
+  "amqpPassword": "ENTER PASSWORD HERE",
+  "amqpCACertName": "ENTER THE NAME OF YOUR CA CERT FILE",
+  "eventHubConnectionString": "Enter the Event Hub Connection String Here"
+```
+
+* If your RMQ host uses AMQPS (AMQP over TLS), you'll need the CA Certfile for the server in **/app/conf/ca_certfile.pem**.
+* Be sure to set the environment variable **amqpProtocol="amqps"**.
+* The field **amqpCACertName=""** should contain the name of your cert file (it will look for the path above) (recommended name is **ca_certfile.pem**).
+
 Note there are two modes for **consumeMode**:
 - oneEach - consumes one message at a time and is suitable for testing or very low volume queues. Messages will be sent to Eventhub one at a time, not in batches.
 - batch - consumes messages in batches controlled by batch size. Suitable for high volume queues. Messages will be sent to Eventhub in batches.
@@ -97,41 +109,22 @@ Note there are two modes for **consumeMode**:
 
 Prefetch is the number of messages "in flight" that a connection into RMQ is allowed. "In flight" means messages that have been sent to a consumer but are not yet ACK by said consumer. The default is unlimited and should be used unless you specifically want to slow down message consumption. Setting a value of 1 would beam that each message must be sent to Eventhub (and then ACK) before RMQ will release a new one. 
 
-## Secrets Explained
-
-The **/app/secrets.json5** file is used to hold secrets for the app and is excluded from the repo via .gitignore.
-
-```json5
-{
-  "amqpUsername": "ENTER USERNAME HERE",
-  "amqpPassword": "ENTER PASSWORD HERE",
-  "amqpCACertName": "ENTER THE NAME OF YOUR CA CERT FILE AND COPY IT TO THE SAME DIR AS secrets.json5",
-
-  // Event Hub Connection String
-  "eventHubConnectionString": "Enter the Event Hub Connection String Here"
-}
-```
-
-* If your RMQ host uses AMQPS (AMQP over TLS), you'll need the CA Certfile for the server in **/app/conf/ca_certfile.pem**.
-* Be sure to set the environment variable **amqpProtocol="amqps"**.
-* Also, in **secrets.json5**, make sure **amqpCACertName=""** contains the name of your cert file (recommended name is **ca_certfile.pem**).
 
 ## How to run the app
 
 > **Note:** See the Dependencies section before trying to run!
 
 * Running natively via NVM (Node Version Manager)
-  * **.env** in **/app**, **secrets.json5** in **/app/conf**, possibly **ca_certificate.pem** (if needed) in **/app/conf**
-  * Be sure you've done `npm i`
-  * Run with: `nvm index.js`
+  * **.env** (same template as **shovel.env**) in **/app** possibly **ca_certificate.pem** (if needed) in **/app/conf**
+  * Be sure you've done `npm i` and `nvm i`
+  * Run with: `nvm run index.js`
 
 * Running natively via NodeJS
-  * **.env** in **/app**, **secrets.json5** in **/app/conf**, possibly **ca_certificate.pem** (if needed) in **/app/conf**
-  * Be sure you've done `npm i`
+  * **.env** (same template as **shovel.env**) in **/app** possibly **ca_certificate.pem** (if needed) in **/app/conf**
   * `node index.js`
 
 * Running locally using the Docker dev config
-  * **.env** in **/rabbitmq-to-eventhub-dev**, **secrets.json5** in **/app/conf**, possibly **ca_certificate.pem** (if needed) in **/app/conf**
+  * **shovel.env** in **/app/conf/**, possibly **ca_certificate.pem** (if needed) in **/app/conf**
   * Be sure you've done `npm i`
   * `docker compose up` to run interactively or `docker compose up -d` to run in the background
   
@@ -140,23 +133,21 @@ The **/app/secrets.json5** file is used to hold secrets for the app and is exclu
 > **Note:** See the Dependencies section before trying to build/deploy!
 
 * When deploying to a remote host, either of the following should work:
-  * Copy the whole repo (with the **secrets.json5** and **ca_certificate.pem** if required) and then build the production docker compose in-place.
+  * Copy the whole repo (with **ca_certificate.pem** if required) and then build the production docker compose in-place.
     * On the target server
       * On servers, Docker Compose needs to be installed. Ensure it's installed. If not, see [Docker Compose Install](https://docs.docker.com/compose/install/).
       * Change into the **rabbitmq-to-eventhub-prod** folder
-      * Ensure you have the proper values in **.env**
-      * Ensure you've edited **/conf/secrets.json5** to suit your needs.
-      * * If you need a **ca_certificate.pem**, make sure it's in **/conf**.
+      * Ensure you have the proper values in **app/conf/.env**
+      * * If you need a **ca_certificate.pem**, make sure it's in **app/conf**.
       * `docker-compose build`
       * `docker-compose up` to run the container interactively. It is recommended that you run the first time with "ackAfterConsume=false" so you don't lose any messages if there's a container error.
       * Once satisfied the container is working properly, stop the interactive mode, change "ackAfterConsume=true" and run with `docker compose up -d` to run in the background
-      * Note that if you change values in **/conf/secrets.json5**, or update your **ca_certificate.pem**, you must repeat the Docker build step. Changing values in **.env** does not require a rebuild.
+      * Note that if you update your **ca_certificate.pem**, you must repeat the Docker build step. Changing values in **.env** does not require a rebuild.
   * The production docker compose build can be done in a remote machine and then the docker container can be exported using Docker's export command.
     * On your build workstation
       * Change into the **rabbitmq-to-eventhub-prod** folder
-      * Ensure you have the proper values in **.env**
-      * Ensure you've edited **/conf/secrets.json5** to suit your needs.
-      * If you need a **ca_certificate.pem**, make sure it's in **/conf**.
+      * Ensure you have the proper values in **app/conf/.env**
+      * * If you need a **ca_certificate.pem**, make sure it's in **app/conf**.
       * `docker compose build`
       * `docker export rabbitmq-to-eventhub-prod > rabbitmq-to-eventhub-prod.tar`
     * On the host
@@ -164,7 +155,7 @@ The **/app/secrets.json5** file is used to hold secrets for the app and is exclu
       * `docker import rabbitmq-to-eventhub-prod.tar`
       * `docker compose up` to run the container interactively. It is recommended that you run the first time with "ackAfterConsume=false" so you don't lose any messages if there's a container error.
       * Once satisfied the container is working properly, stop the interactive mode, change "ackAfterConsume=true" and run with `docker compose up -d` to run in the background
-      * Note that if you change values in **/conf/secrets.json5**, or update your **ca_certificate.pem**, you must repeat the Docker build step (and export/upload/import to your host).
+      * Note that if you update your **ca_certificate.pem**, you must repeat the Docker build step (and export/upload/import to your host).
       
 Environment variable notes for running in-place at an RMQ server (it's assumed said server is using AMQPS / AMQP over TLS):
 
@@ -213,8 +204,7 @@ To do this we add the following to docker-compose.yml service entry for rmq-to-e
 - "host-gateway" is a special docker setting that represents the host's IP internally.
 
 An example SSH tunnel on the docker host: (on the host, port 15671 will be forwarded to the RMQ's port 5671)
-
-```bash
+`bash
 ssh -N -i "/path/to/your/key.pem" -L 127.0.0.1:15671:127.0.0.1:5671 -o ServerAliveInterval=15 -o ExitOnForwardFailure=yes -o ServerAliveCountMax=3 -p YOUR-PORT-NUMBER YOUR-USERNAME@YOU-HOST-IP-OR-NAME
 ```
 

@@ -1,14 +1,17 @@
 version: '3.7'
 
 services:
-
-  # External HTTP API that accepts messages from devices
   rmq-to-eventhub:
+    #image: rabbitmq-to-eventhub-shovel:latest
+    image: 029409915753.dkr.ecr.us-east-1.amazonaws.com/rabbitmq-to-eventhub-shovel:latest
+    platform: linux/amd64
     build:
       context: ../../../app
     user: 'node'
     restart: always
     working_dir: /home/node/app
+    env_file:
+      - ../../../app/conf/shovel.env
 #    extra_hosts:
 #      # If the RMQ host requires an SSH tunnel, we need to map the RMQ hostname with the internal special host gateway
 #      # in order send the traffic to the docker host! This is like setting the HOSTS file inside the container.
@@ -16,28 +19,33 @@ services:
 #      # Otherwise, leave this entire section commented!
 #      - "${amqpHost}:host-gateway"
     environment:
-      # If only the name is provided, keep the value in the .env file
-      # Otherwise, override any entries by providing =value.
-      - NODE_ENV
-      - logLevel=info # Override the LOG_LEVEL value set in .env with ALL
-      - amqpHost
-      - amqpVhost
-      - amqpPort
-      - amqpProtocol
-      - amqpConsumeQueue
-      - ackAfterConsume
-      - eventHubName
-      - consumeMode
-      - amqpPrefetch
-      - batchMaxSizeBytes
-      - batchMaxTimeMs
-      - consumeLimit
+      # Override values in the .env file
+       - dummyEnvVar=overrideValue
+#      - NODE_ENV
+#       - logLevel=info # Override the LOG_LEVEL value set in .env with ALL
+#      - amqpHost
+#      - amqpVhost
+#      - amqpPort
+#      - amqpProtocol
+#      - amqpConsumeQueue
+#      - ackAfterConsume
+#      - eventHubName
+#      - consumeMode
+#      - amqpPrefetch
+#      - batchMaxSizeBytes
+#      - batchMaxTimeMs
+#      - consumeLimit
+#      - amqpUsername
+#      - amqpPassword
+#      - amqpCACertName
+#      - eventHubConnectionString
+
     command: 'npm run start'
-    volumes:
-      - type: bind
-        source: ../../../app
-        target: /home/node/app
-      - type: bind
-        source: .env
-        target: /home/node/app/.env
+#    volumes:
+#      - type: bind
+#        source: ../../../app
+#        target: /home/node/app
+#      - type: bind
+#        source: .env
+#        target: /home/node/app/.env
 

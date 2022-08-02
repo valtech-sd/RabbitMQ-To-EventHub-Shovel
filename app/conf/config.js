@@ -1,7 +1,3 @@
-// Support JSON5 files
-require('json5/lib/register');
-// Bring in the Secrets file
-const secrets = require('./secrets.json5');
 // Support for File System
 const fs = require('fs');
 
@@ -15,8 +11,8 @@ const amqpConfig = {
   // Protocol should be "amqps" or "amqp"
   protocol: amqpProtocol,
   // Username + Password on the RabbitMQ host
-  username: process.env.amqpUsername || secrets.amqpUsername,
-  password: process.env.amqpPassword || secrets.amqpPassword,
+  username: process.env.amqpUsername,
+  password: process.env.amqpPassword,
   // Host
   host: process.env.amqpHost || 'localhost',
   // Virtual Host inside Host
@@ -35,14 +31,14 @@ const amqpConfig = {
     connectionOptions: {
       // If using AMQPS, we need to pass the contents of your CA file as a buffer into the broker host via amqp_opts.
       // This is facilitated for you here. Just copy your CA CERT file to the same location as this config file
-      // then edit the secrets.json5 file to enter the NAME of your CA CERT file! Don't forget to set 'amqps' and
+      // then edit the shovel.env file to enter the NAME of your CA CERT file! Don't forget to set 'amqps' and
       // 'port' to the corresponding AMQPS values also in this configuration!
       // See https://www.squaremobius.net/amqp.node/ssl.html for more details.
       ca:
-        amqpProtocol === 'amqps' && secrets.amqpCACertName !== ''
+          amqpProtocol === 'amqps' && process.env.amqpCACertName !== ''
           ? [
               fs.readFileSync(
-                __dirname + '/' + secrets.amqpCACertName || 'ca_certificate.pem'
+                __dirname + '/' + process.env.amqpCACertName || 'ca_certificate.pem'
               ),
             ]
           : null,
@@ -53,9 +49,10 @@ const amqpConfig = {
   ackAfterConsume: process.env.ackAfterConsume === 'true' || false,
 };
 
+
 const eventHubConfig = {
   eventHubConnectionString:
-    process.env.eventHubConnectionString || secrets.eventHubConnectionString,
+      process.env.eventHubConnectionString,
   eventHubName: process.env.eventHubName || 'example-eventhub-name',
 };
 
