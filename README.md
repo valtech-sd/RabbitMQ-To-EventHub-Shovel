@@ -18,6 +18,9 @@ See [Environment Variables Explained](#Environment-Variables-Explained).
 
 * Last, you need an RMQ server and an Azure Event Hub. Messages from a queue in the RMQ server will be sent to the Azure Event Hub. Note the routing key set in RMQ will be passed into Azure Event Hub via the properties bag. (EventHub sends your program an EventData object that has the properties "body" and "properties". The routing key will be passed into **EventData.properties.routingKey**).
 
+
+When sending events to Azure Event Hubs with the Advanced Message Queuing Protocol (AMQP) protocol (the protocol we utilize through RabbitMQ), you may need to [open some firewall ports](https://docs.microsoft.com/en-us/azure/event-hubs/troubleshooting-guide) (5671 and 5672).
+
 ## Environment Variables Explained
 
 The `app/conf/shovel.env `file is used to control all the parameters and secrets for the app. 
@@ -122,6 +125,11 @@ Prefetch is the number of messages "in flight" that a connection into RMQ is all
 * Running natively via NodeJS
   * **.env** (same template as **shovel.env**) in **/app** possibly **ca_certificate.pem** (if needed) in **/app/conf**
   * `node index.js`
+
+  * note: if you happen to be trying to receive messages from a locally running rabbit instance (such as message-broker from ipb-dev-standup) you're going to need to adjust your .env to be pointing to the localhost (obviously) but also to choose the insecure amqpProtocol and associated port)
+    * amqpHost=localhost
+    * amqpPort=5672 
+    * amqpProtocol=amqp
 
 * Running locally using the Docker dev config
   * **shovel.env** in **/app/conf/**, possibly **ca_certificate.pem** (if needed) in **/app/conf**

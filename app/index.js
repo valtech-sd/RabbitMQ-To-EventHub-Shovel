@@ -1,19 +1,49 @@
 /**
  * Dependencies
  */
+const fs = require('fs')
 // Bring in Core Node Dependencies
 const util = require('util');
 // Bring in Package Dependencies
 const { default: AmqpCacoon } = require('amqp-cacoon');
 const { EventHubProducerClient } = require('@azure/event-hubs');
+const dotenv = require('dotenv')
+const logger = require('./modules/custom-logger');
+
 // Use dotenv to pull from a local .env file in the root of the project
 // Any variables in that file will be available as 'process.env.VAR_NAME'.
 // NOTE: THIS MUST BE VERY EARLY BEFORE OTHER LOCAL FILES LOAD SO THEY HAVE
 //       ACCESS TO THE HYDRATED process.env.
-require('dotenv').config();
+
+//todo: export/import 'env arg checking' script from send-via-eventhubnodelib.js
+//todo: supposed to be able to load .env handed from docker as well
+
+
+// var env_path = "./conf/" + "shovel.env"
+// var env_path = "./conf/" + "860.staging.env"
+// var env_name=  "shovel.331.526PR.env";
+var env_name= "shovel.local-message-broker.env"
+
+if (fs.existsSync( "./conf/" + env_name)) {
+  logger.info("loading", env_name);
+  dotenv.config({path: "./conf/" + env_name})
+}
+else {
+  dotenv.config()
+  if(process.env.logLevel){logger.info("loading .env")}
+  else{ logger.error("couldn't load any env");process.exit(1)}
+}
+
+// require('dotenv').config({
+//     // path: '../../deployments/p407-local/conf/eventhub-logstash.env',
+//     // path: '../../deployments/p331-local/conf/eventhub-logstash.env',
+//     //path: '122102.env',
+//     path: './conf/shovel.env',
+//     // path: '860.staging.env',
+//   });
 
 // Bring in other Application Specific dependencies
-const logger = require('./modules/custom-logger');
+
 // Bring in our AMQP Broker configuration
 const config = require('./conf/config');
 // Bring in our MessageProcessor
@@ -105,5 +135,5 @@ handler()
   })
   .catch((e) => {
     // Uh Oh... something went wrong
-    console.error(`Something bad happened: ${e.message}`);
+    logger.error(`Something bad happened: ${e.message}`);
   });

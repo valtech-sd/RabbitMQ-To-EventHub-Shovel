@@ -11,39 +11,14 @@ services:
     restart: always
     working_dir: /home/node/app
     env_file:
-      - ../../../app/conf/shovel.env
-#    extra_hosts:
-#      # If the RMQ host requires an SSH tunnel, we need to map the RMQ hostname with the internal special host gateway
-#      # in order send the traffic to the docker host! This is like setting the HOSTS file inside the container.
-#      # Uncomment this if you need to use an SSH tunnel.
-#      # Otherwise, leave this entire section commented!
-#      - "${amqpHost}:host-gateway"
-    environment:
-      # Override values in the .env file
-       - dummyEnvVar=overrideValue
-#      - NODE_ENV
-#       - logLevel=info # Override the LOG_LEVEL value set in .env with ALL
-#      - amqpHost
-#      - amqpVhost
-#      - amqpPort
-#      - amqpProtocol
-#      - amqpConsumeQueue
-#      - ackAfterConsume
-#      - eventHubName
-#      - consumeMode
-#      - amqpPrefetch
-#      - batchMaxSizeBytes
-#      - batchMaxTimeMs
-#      - consumeLimit
-#      - amqpUsername
-#      - amqpPassword
-#      - amqpCACertName
-#      - eventHubConnectionString
+      - ./conf/shovel.env
+    volumes:
+      - ./conf/:/home/node/app/conf/cert
 
     command: 'npm run start'
 #    volumes:
 #      - type: bind
-#        source: ../../../app
+#        source: home/node/app/config
 #        target: /home/node/app
 #      - type: bind
 #        source: .env

@@ -1,11 +1,16 @@
 // Support for File System
 const fs = require('fs');
-
+const path = require('path');
 // Enter either "amqp" or "amqps"
 const amqpProtocol = process.env.amqpProtocol || 'amqps';
 // Port is automatically selected if amqpPort is null
 // Otherwise, to force a specific port, enter it here!
 const amqpPort = process.env.amqpPort;
+
+const directoryPath = path.join(__dirname, 'cert');
+
+// console.log("cert",fs.readFileSync(
+//      directoryPath + '/' + (process.env.amqpCACertName || 'ca_certificate.pem'),'utf8'))
 
 const amqpConfig = {
   // Protocol should be "amqps" or "amqp"
@@ -37,9 +42,9 @@ const amqpConfig = {
       ca:
           amqpProtocol === 'amqps' && process.env.amqpCACertName !== ''
           ? [
-              fs.readFileSync(
-                __dirname + '/' + process.env.amqpCACertName || 'ca_certificate.pem'
-              ),
+                fs.readFileSync(
+                    directoryPath + '/' + (process.env.amqpCACertName || 'ca_certificate.pem')
+                ),
             ]
           : null,
     },

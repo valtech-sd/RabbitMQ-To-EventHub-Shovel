@@ -2,7 +2,7 @@
 tmp/
 
 # Exclude .env files globally
-**/.env
+**/*.env
 shovel.env
 
 # Exclude certs
