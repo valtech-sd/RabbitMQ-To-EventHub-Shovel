@@ -131,7 +131,7 @@ class MessageProcessorPrivate {
         this.logger.trace(`Message: ${msg.content.toString()}`);
         // Add the message to the Event Hub Batch
         eventHubBatch.tryAdd({
-          body: msg.content.toString(),
+          body: msg.content,
           properties: { routingKey: msg.fields.routingKey },
         });
       }
