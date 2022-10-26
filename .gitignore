@@ -2,7 +2,12 @@
 tmp/
 
 # Exclude .env files globally
-**/.env
+**/*.env
+# Except env templates
+!*template.env
+
+# Exclude cert files globally
+**/*.pem
 
 # Excluding node_modules
 node_modules
@@ -49,4 +54,3 @@ atlassian-ide-plugin.xml
 
 # Editor-based Rest Client
 .idea/httpRequests
-

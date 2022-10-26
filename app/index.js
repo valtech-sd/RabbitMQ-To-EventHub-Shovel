@@ -1,24 +1,39 @@
 /**
  * Dependencies
  */
+const fs = require('fs')
 // Bring in Core Node Dependencies
 const util = require('util');
 // Bring in Package Dependencies
 const { default: AmqpCacoon } = require('amqp-cacoon');
 const { EventHubProducerClient } = require('@azure/event-hubs');
+const dotenv = require('dotenv')
+const logger = require('./modules/custom-logger');
+
 // Use dotenv to pull from a local .env file in the root of the project
-// Any variables in that file will be available as 'process.env.VAR_NAME'.
+// Any variables in that file will be available as 'process.env.VAR_NAME'
+//
 // NOTE: THIS MUST BE VERY EARLY BEFORE OTHER LOCAL FILES LOAD SO THEY HAVE
-//       ACCESS TO THE HYDRATED process.env.
-require('dotenv').config();
+//  ACCESS TO THE HYDRATED process.env.
+
+
+if (process.argv[2] && fs.existsSync(  process.argv[2])) {
+  logger.info("loading", process.argv[2]);
+  dotenv.config({path: process.argv[2]})
+}
+else {
+  //without an arg, this looks for .env next to this index.js file
+  dotenv.config()
+  if(process.env.logLevel){logger.info("loading .env")}
+  else{ logger.error("couldn't load any env");process.exit(1)}
+}
 
 // Bring in other Application Specific dependencies
-const logger = require('./modules/custom-logger');
+
 // Bring in our AMQP Broker configuration
 const config = require('./conf/config');
 // Bring in our MessageProcessor
 const MessageProcessor = require('./modules/MessageProcessor');
-
 // Constants
 const amqpPrefetch = parseInt(process.env.amqpPrefetch) || false;
 
@@ -105,5 +120,5 @@ handler()
   })
   .catch((e) => {
     // Uh Oh... something went wrong
-    console.error(`Something bad happened: ${e.message}`);
+    logger.error(`Something bad happened: ${e.message}`);
   });

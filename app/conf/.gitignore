@@ -1,3 +1,0 @@
-# Exclude the secrets we don't want in the repo
-secrets.json5
-*.pem
