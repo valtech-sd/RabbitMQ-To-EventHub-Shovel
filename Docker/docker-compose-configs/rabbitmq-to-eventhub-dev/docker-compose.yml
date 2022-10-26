@@ -4,7 +4,6 @@ services:
   rmq-to-eventhub:
     #image: rabbitmq-to-eventhub-shovel:latest
     image: 029409915753.dkr.ecr.us-east-1.amazonaws.com/rabbitmq-to-eventhub-shovel:latest
-    platform: linux/amd64
     build:
       context: ../../../app
     user: 'node'
@@ -14,13 +13,5 @@ services:
       - ./conf/shovel.env
     volumes:
       - ./conf/:/home/node/app/conf/cert
-
     command: 'npm run start'
-#    volumes:
-#      - type: bind
-#        source: home/node/app/config
-#        target: /home/node/app
-#      - type: bind
-#        source: .env
-#        target: /home/node/app/.env
 

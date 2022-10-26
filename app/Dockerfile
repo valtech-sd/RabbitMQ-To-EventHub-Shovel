@@ -17,7 +17,6 @@ RUN npm install
 COPY --chown=node:node . ./
 # Set environment variables
 ENV NODE_ENV production
-
 # Run default node app on startup (however, since this project supports various modes, this should be overriden
 # in either the Docker CLI or Docker Compose in order to start the other modes.
 CMD [ "npm","run","start"]

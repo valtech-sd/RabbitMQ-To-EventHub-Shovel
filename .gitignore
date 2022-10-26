@@ -54,5 +54,3 @@ atlassian-ide-plugin.xml
 
 # Editor-based Rest Client
 .idea/httpRequests
-
-/app/conf/deprecated/secrets.mkalx.json5
