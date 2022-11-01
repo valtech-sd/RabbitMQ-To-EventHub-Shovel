@@ -23,7 +23,7 @@ When sending events to Azure Event Hubs with the Advanced Message Queuing Protoc
 
 ## Environment Variables Explained
 
-The `app/conf/shovel.env `file is used to control all the parameters and secrets for the app. Details about the parameters can be found in shovel.env.template`. You'll want to copy `shovel.env.template` and fill in the details you need, or just download one for your setup from 1password if available. Example key: `P331 Staging Analytics Info`
+The `app/conf/shovel.env` file is used to control all the parameters and secrets for the app. Details about the parameters can be found in `shovel.env.template`. You'll want to copy `shovel.env.template` and fill in the details you need, or just download one for your setup from 1password for existing environments. Example key: `P331 Staging Analytics Info`
 
 Additionally, control the behavior of the app corresponding to your run method by consulting to the `How to run the app` section below.
 
@@ -59,7 +59,7 @@ Navigate to /app
 
 * Running as an image in another docker-compose after building using the Docker config  
 
-  The main use of this project right now is as the base image of a service included in a docker-compose.yml that runs the various different services we use to realize 'analytics'. You can find examples of these compositions in the analytics project `uni-dax-p526` under `deployments`, and specific directions on how to build and deploy the built image to the ECR for EC2 usage in the readme in that directory, `README-analytics-compose.md`. 
+  The main use of this project right now is as the base image of a service included in a docker-compose.yml that runs the various different services we use to realize 'analytics'. You can find examples of these compositions in the analytics project `uni-dax-p526` under `deployments`, and specific directions on how to build and deploy the built image to the ECR for EC2 usage in the readme in that directory, `README-analytics-compose.md`.
 
 
 * Running natively via NodeJS
